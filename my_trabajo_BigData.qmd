@@ -1,0 +1,857 @@
+---
+title: "Arreglando la Economía Española como no lo haría un economista (o cinco excusas para programar)"
+description: |
+  Cinco medidas que te puedo decir antes de graduarme (y supuestamente ser economista).
+author:
+  - name: Alejandro Lucas
+    affiliation: Universitat de València
+    affiliation-url: https://www.uv.es
+date: 2024-01-23                           #--
+categories: [trabajo BigData, economía, programación, crecimiento económico, universidad, CO2, uranio, renta pc]   #--
+image: ""
+title-block-banner: "#101820" #- {true, false, "green","#AA0000"}
+title-block-banner-color: "white"    #-"#FFFFFF" 
+toc-depth: 3
+smooth-scroll: true
+format: 
+  html:
+    backgroundcolor: "#ffffc5"
+    #embed-resources: true
+    link-external-newwindow: true
+    css: ./assets/my_css_file.css   #- CUIDADO!!!!
+code-tools: true
+code-link: true
+---
+
+
+## Introducción
+
+La renta per cápita en términos reales de nuestra economía lleva estancada más de 15 años, mientras que la PTF se mantiene a nivel de los años 80 (consecuentemente, los salarios reales prácticamente no crecen), además, no hemos conseguido recortar la distancia con Europa, es decir, no hemos convergido y nuestro bienestar económico lleva décadas estancado. Para profundizar en estos temas se pueden ver las dos conferencias siguientes:
+
+```{r}
+#| echo = FALSE,
+#| out.width = "100%"
+library(vembedr)
+embed_url("https://www.youtube.com/watch?v=H7ajZkk4FSk&t=10s")
+```
+
+```{r}
+#| echo = FALSE,
+#| out.width = "100%"
+embed_url("https://youtu.be/ySc5EdlfrHM?si=nc0xmKQoph46bMR9")
+```
+
+Es entendible que el lector prefiera creerme y no verse dos horas de contenido audiovisual no demasiado estimulante pero sí muy pesimista, podría decir que no creo que la fe sea suficiente (al menos a la hora de hablar de crecimiento económico) y dar argumentos que justifiquen las afirmaciones previas, pero como con las 5 medidas que voy a proponer tendréis que hacer un salto de fe, mejor empezar ya, así arreglaremos España cuanto antes y evitaremos que suceda lo que dice Jesús en una de las conferencias:
+
+> *Vamos a camino de las bodas de plata, de 25 años de carencia de crecimiento económico.*
+
+En este contexto, es necesario y urgente proponer soluciones, el carácter de las mismas puede ser muy diverso, pero aquí no estamos para pensar en que suena mejor o peor, estamos para arreglar las cosas, hay que ser técnicos y maximizar el bienestar social, por tanto, empezamos ya.
+
+## 1. Cerrar las facultades de Humanidades (y la mitad de Ciencias Sociales casi que también).
+
+No quiero que el lector se enfade todavía, no le guardo ningún tipo de animadversión a esta rama del conocimiento, de hecho, un servidor, en primero de carrera, estuvo muy cerca de abandonar Economía y matricularse en Historia, esta decisión casi se hizo efectiva, fundamentalmente, por la cantidad de asignaturas de mierda y de escaso valor (ejem, Derecho Mercantil, Dirección de Empresas, Contabilidad Financiera, etc.) que a uno le hacen estudiar para formarse como economista (??). Además de esto, a un servidor también le apasiona la Filosofía, como dato anecdótico, muy probablemente haya consumido más horas de contenido de Ernesto Castro en YouTube que de cualquier otro creador de contenido, esto toma relevancia cuando uno sabe que sus vídeos tienen una duración aproximada, en promedio, de dos horas, y que son lecciones de Ética, Estética o de Historia de la Filosofía en la Universidad Complutense de Madrid.
+
+```{r}
+#| echo = FALSE,
+#| out.width = "100%"
+embed_url("https://www.youtube.com/watch?v=Z0cF-aKjJhY&list=PLpolKVD304mwA_bGDdVyYKKnUCEhsCG40&index=3")
+```
+
+Pero, como habrá quedado claro, esto no es más que un **hobby**, y el momento en el que uno se matricula en uno de estos grados, pasa a ser un hobby para ricos, no por el coste económico de esta decisión, sino por el coste de oportunidad. En un país funcional en el que el gasto público en educación universitaria siguiese unos criterios de optimización, el coste de estos grados seria altísimo, es decir, no estaría subvencionado en su práctica totalidad como sí sucede ahora. Más o menos, sería similar a lo que hoy en día puede ser aprender a tocar el piano pagando las tasas de una Escuela de Música o de un Conservatorio.
+
+En este sentido, es interesante analizar los salarios, el desempleo, el número de titulados y todas estas variables a la hora de estudiar lo que sucede con la demanda laboral de los graduados en estas ramas. Para ello, tenemos la [Encuesta de Inserción Laboral del año 2019 que el INE](https://www.ine.es/ss/Satellite?L=es_ES&c=INESeccion_C&cid=1259948984778&p=%2F&pagename=ProductosYServicios%2FPYSLayout&param1=PYSDetalle&param3=1259924822888) pone a nuestra disposición. 
+
+::: panel-tabset
+## Código
+```{r}
+#| code-fold: true
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(gt)
+
+paro <- "https://github.com/aluse33/datos_trabajo/raw/main/48895%20(2).xlsx"
+
+download.file(url = paro, destfile = "./datos/48895%20(2).xlsx")
+
+paro <- rio::import("./datos/48895%20(2).xlsx")
+
+df_paro <- paro %>% 
+  na.omit() %>% 
+  rename(Titulación = `Inserción laboral de titulados universitarios`, Desempleo = ...2) 
+
+#- los datos de tasas de paro están en character, los pasamos a numeric
+
+df_paro$Desempleo <- as.numeric(df_paro$Desempleo)
+
+df_paro <- df_paro %>% 
+  arrange(desc(Desempleo)) %>% 
+  slice(1:15)
+
+tabla_paro <- gt(df_paro) %>%
+  gtExtras::gt_plt_dot(column = "Desempleo", category_column = `Titulación`,  
+                       max_value = NULL, palette = "wesanderson::IsleofDogs1") %>%
+  gtExtras::gt_theme_guardian() %>%
+  cols_width(`Titulación` ~ px(400), 2 ~ px(150)) %>% 
+  tab_header(title = "Top 15 titulaciones con mayor tasa de paro.",
+             subtitle = "Año 2019, datos obtenidos del INE.")
+#- tabla_paro
+```
+## Tabla
+```{r}
+#| code-fold: true
+tabla_paro
+```
+:::
+
+De hecho, los datos de desempleo todavía pueden ocultarnos información: al fin y al cabo, quizá, si estudias Filosfía no tienes trabajo como filósofo, pero sí en algo totalmente ajeno a ello y acabas trabajando ahí. Podemos analizar, también, el nivel óptimo de estudios demandado para el puesto de trabajo en el que se encuentra un titulado en x grado, de manera que si, por ejemplo, el 35% de los titulados en Filosofía trabajan en algo para lo que no era necesario el grado y, según los datos, con la ESO les bastaba, es evidente que ese algo no tiene relación alguna con el mundo de la Filosofía.
+
+::: panel-tabset
+## Código
+```{r}
+#| code-fold: true
+library(rio)
+library(tidyverse)
+library(dplyr)
+library(DT)
+
+estudios <- "https://github.com/aluse33/datos_trabajo/raw/main/38231.xlsx"
+
+download.file(url = estudios, destfile = "./datos/38231.xlsx")
+
+nvl <- rio::import("./datos/38231.xlsx")
+
+nvl <- nvl %>% 
+  slice(6, 9:110) %>% 
+  rename(`Grados y nivel relativo óptimo de estudios por empleo` = `Graduados universitarios. Cifras relativas`, Doctorado = ...2, `Máster` = ...3, `Título` = ...4, `Grado superior` = ...5, `Grado Medio` = ...6, `Grado básico` = ...7, ESO = ...8) %>% 
+  arrange(`Título`) %>% 
+  na.omit()
+
+
+tabla_nvl <- DT::datatable(
+  data = nvl,
+  caption = htmltools::tags$caption(
+    style = 'caption-side: top; text-align: center;',
+    '', htmltools::em("Nivel óptimo de estudios en función del empleo por titulación del graduado")),
+  filter = "top",
+  class = "cell-border stripe")
+
+#- tabla_nvl
+
+```
+## Tabla
+```{r}
+#| code-fold: true
+tabla_nvl
+```
+:::
+
+Ahora podemos ver el porcentaje de titulados que podrían trabajar en su actual puesto de trabajo sin haber estudiado la carrera que han estudiado:
+
+::: panel-tabset
+## Código
+```{r}
+#| code-fold: true
+nvl <- nvl %>% 
+  mutate(across(-1, as.numeric)) %>% 
+  mutate(`Porcentaje de titulados que podrían trabajar sin el título` = rowSums(select(., `Grado superior`:ESO), na.rm = TRUE)) %>% 
+  mutate(`Porcentaje de titulados que necesitan el título en su puesto` = rowSums(select(., Doctorado:`Título`), na.rm = TRUE)) %>% 
+  arrange(desc(`Porcentaje de titulados que podrían trabajar sin el título`)) %>% 
+  top_n(15, wt = `Porcentaje de titulados que podrían trabajar sin el título`) %>% 
+  select(`Grados y nivel relativo óptimo de estudios por empleo`, `Porcentaje de titulados que podrían trabajar sin el título`)
+
+table_nvl <- gt(nvl) %>%
+  gtExtras::gt_plt_dot(column = "Porcentaje de titulados que podrían trabajar sin el título", category_column = `Grados y nivel relativo óptimo de estudios por empleo`,  
+                       max_value = NULL, palette = "wesanderson::Darjeeling1") %>%
+  gtExtras::gt_theme_espn() %>%
+  cols_width(`Grados y nivel relativo óptimo de estudios por empleo` ~ px(400), 2 ~ px(150)) %>% 
+  tab_header(title = "Top 15 titulaciones que te llevarán a trabajar en cualquier cosa menos en algo relacionado con lo que has estudiado.",
+             subtitle = "Año 2019, datos obtenidos del INE.")
+#- table_nvl
+```
+## Tabla
+```{r}
+#| code-fold: true
+table_nvl
+```
+:::
+
+A la hora de analizar los salarios, los resultados son muy similares a lo visto *ut supra*: 
+
+::: panel-tabset
+## Código
+```{r}
+#| code-fold: true
+library(rio)
+library(tidyverse)
+library(dplyr)
+library(DT)
+
+sueldos <- "https://github.com/aluse33/datos_trabajo/raw/main/38328.xlsx"
+
+download.file(url = sueldos, destfile = "./datos/38328.xlsx")
+
+sueldos <- rio::import("./datos/38328.xlsx")
+
+sueldos <- sueldos %>% 
+  slice(8:107) %>% 
+  rename(`Menos de 700 euros` = ...2, `De 700 a 999 euros` = ...3, `De 1.000 a 1.499 euros` = ...4, `De 1.500 a 1.999 euros` = ...5, `De 2.000 a 2.499 euros` = ...6, `De 2.500 a 2.999 euros` = ...7, `De 3.000 euros en adelante` = ...8) %>% 
+  na.omit()
+
+tabla_sueldos <- DT::datatable(
+  data = sueldos,
+  caption = htmltools::tags$caption(
+    style = 'caption-side: top; text-align: center;',
+    '', htmltools::em("Sueldos en el primer empleo en función de la titulación")),
+  filter = "top",
+  class = "cell-border stripe",
+  extensions = 'Buttons', 
+  options = list(dom = 'Blfrtip', 
+                 buttons = c('copy', 'csv', 'excel', 'pdf', 'print')))
+
+#- tabla_sueldos
+```
+## Tabla
+```{r}
+#| code-fold: true
+tabla_sueldos
+```
+:::
+
+El SMI es, actualmente, superior a 1000€, por lo que, previsiblemente, todo aquel que cobre menos de 1000€ será porque:
+
+1. Está subempleado (i.e. no trabaja a jornada completa, evidentemente, alguno querrá que esto sea así, pero la mayor parte del subempleo es involuntario).
+
+2. Trabajará como becario cobrando menos del SMI.
+
+::: panel-tabset
+## Código
+```{r}
+#| code-fold: true
+sueldos <- sueldos %>% 
+  mutate(across(-1, as.numeric)) %>% 
+  mutate(`Menos de 1000€ netos al mes` = `Menos de 700 euros` + `De 700 a 999 euros`) %>% 
+  select(`Graduados universitarios. Cifras relativas`, `Menos de 1000€ netos al mes`) %>% 
+  arrange(desc(`Menos de 1000€ netos al mes`)) %>% 
+  top_n(15, wt = `Menos de 1000€ netos al mes`)
+
+table_sueldos <- gt(sueldos) %>%
+  gtExtras::gt_plt_dot(column = "Menos de 1000€ netos al mes", category_column = `Graduados universitarios. Cifras relativas`, max_value = NULL, palette = "wesanderson::BottleRocket1") %>%
+  gtExtras::gt_theme_nytimes() %>%
+  cols_width(`Graduados universitarios. Cifras relativas` ~ px(400), 2 ~ px(150)) %>% 
+  tab_header(title = "Top 15 titulaciones con las que es más probable ganar menos de 1000€ al mes.", subtitle = "Año 2019, datos obtenidos del INE.")
+
+#- table_sueldos
+```
+## Tabla
+```{r}
+#| code-fold: true
+table_sueldos
+```
+
+::: 
+
+Estos temas están a la orden del día dentro del debate público, de hecho, hoy al leer Twitter mientras desayunaba, me he encontrado con una serie de tweet que ilustran esta situación y me parece que nos vienen al pelo, por lo que los adjunto por aquí abajo:
+
+```{r}
+#| echo = FALSE,
+#| out.width = "100%"
+library(tweetrmd) #- devtools::install_github("gadenbuie/tweetrmd")
+include_tweet("https://x.com/joantubau/status/1749187306538348584")
+```
+
+```{r}
+#| echo = FALSE,
+#| out.width = "100%"
+include_tweet("https://x.com/sisamon/status/1749019381814747340?s=20")
+```
+
+```{r}
+#| echo = FALSE,
+#| out.width = "100%"
+include_tweet("https://x.com/amjorge15/status/1749201576185503865?s=20")
+```
+
+```{r}
+#| echo = FALSE,
+#| out.width = "100%"
+include_tweet("https://x.com/OscarEconomik/status/1749341052840837256?s=20")
+```
+
+```{r}
+#| echo = FALSE,
+#| out.width = "100%"
+include_tweet("https://x.com/juanrallo/status/1749197982753304818?s=20")
+```
+
+```{r}
+#| echo = FALSE,
+#| out.width = "100%"
+include_tweet("https://x.com/Edu_Riera_/status/1749410865558769916?s=20")
+```
+
+Pues eso, parece que todo está dicho. Eso sí, un dato algo más optimista y con el que nos podríamos plantear no cerrar todas las facultades de Humanidades y transformarlas en facultades de Ingeniería, sería el del número de titulados en España en los diferentes grados, vemos que, por fortuna, la mayor parte de los egresados universitarios estudian carreras diferentes a las ya vistas:
+
+::: panel-tabset
+## Código
+```{r}
+#| code-fold: true
+library(tidyverse)
+library(tidyr)
+library(gt)
+library(gtExtras)
+
+titulados <- "https://github.com/aluse33/datos_trabajo/raw/main/48889.xlsx"
+
+download.file(url = titulados, destfile = "./datos/48889.xlsx")
+
+titulados <- rio::import("./datos/48889.xlsx")
+
+#- quitamos las categorías y nos quedamos con las titulaciones
+
+titulados <- titulados %>% 
+  na.exclude() %>% 
+  rename(Titulaciones = `Inserción laboral de titulados universitarios`, Graduados = ...2)
+
+titulados$Graduados <- as.numeric(titulados$Graduados)
+
+titulados <- titulados %>% 
+  mutate(Porcentaje = Graduados / Graduados[1]) %>% 
+  mutate(Porcentaje = sprintf("%.2f%%", round(Porcentaje * 100, 2)))
+
+titulados$Porcentaje <- as.numeric(sub("%", "", titulados$Porcentaje))
+
+titulados <- titulados %>% 
+  mutate(Titulaciones = trimws(Titulaciones)) %>% 
+  arrange(desc(Graduados)) %>% 
+  filter(Titulaciones != "TOTAL") %>% 
+  top_n(15, wt = Porcentaje)
+
+tabla_titulados <- gt(titulados) %>% 
+  gtExtras::gt_theme_nytimes() %>% 
+  tab_header(title = "Graduados por titulación en 2019.",
+             subtitle = "Top 15, cifras absolutas y porcentuales, datos obtenidos del INE.") %>% 
+  gt::data_color(columns = c(Graduados:Porcentaje),
+    fn = scales::col_numeric(
+      palette = c("#A89E73", "#4D2D18"),
+      domain = NULL,
+      reverse = FALSE))
+
+#- tabla_titulados
+```
+## Tabla
+```{r}
+#| code-fold: true
+tabla_titulados
+```
+:::
+
+En esencia, subvencionar los hobbies de la gente no está bien, a todos nos parecerá evidente que cuando la demanda social de plazas de Medicina o de Ingeniería está por debajo de la considerada óptima, subvencionar las matrículas y ampliar el número de plazas puede ser algo necesario; bueno, pues al contrario, sucede lo mismo. Esto no significa cerrar absolutamente todo, significa reducir las plazas y aumentar el coste (que ahora se externaliza socialmente), al fin y al cabo, el 1% de los titulados en estas carreras pueden ser brillantes y muy inteligentes (quizá los de Periodismo no), en ese caso no habría problemas derivados del menor número de plazas o del mayor coste, ya que estarían becados.
+
+
+## 2. Contaminar  mucho, NO al mercado de permisos de emisión de CO2.
+
+Podemos ver que España es un cero a la izquierda cuando hablamos de contaminación a nivel mundial, ahora veremos los datos representados gráficamente y en un mapa de coropletas, pero ya hago yo un adelanto: emitimos el 0.6% de todas las toneladas métricas de CO2 que se emiten al año a nivel mundial, por lo que regular lo que va a pasar con los motores de combustión (especialmente con los diésel) y obligar a nuestras empresas a comprar permisos de emisión de CO2 cuyo precio no para de subir es sencillamente estúpido, todavía más cuando los que contaminan de verdad se pasan cualquier tipo de norma medioambiental por el [Arco de Belén](https://es.wikipedia.org/wiki/Arco_de_Bel%C3%A9n); o sea, seamos serios, vamos a hacer que las clases más vulnerables de nuestro país no puedan comprarse un coche nuevo porque van a costar 30.000 pavos (como poco), pero más del 60 % de la producción de electricidad en China se consigue quemando carbón^[Ver noticia [aquí](https://elperiodicodelaenergia.com/el-boom-electrico-de-china-en-el-siglo-xxi-da-panico-ha-sextuplicado-la-generacion-a-base-de-carbon/)], ¿estamos locos?
+
+Ahora bien, alguien podría decirme: “Oye Alejandro, pero es que si China e India emite el 35% del CO2 a escala mundial es, en parte, porque nosotros les compramos, y claro, achacarles toda esa contaminación a ellos y a nosotros solo un 0.6% no es justo, los datos subestiman nuestra contaminación y sobreestiman la suya”. Vale, ¿y? Me la pela. Aquí buscamos programar, arreglar la economía española no es más que una fachada, no vamos a ponernos a decir cosas serias. 
+
+Siguiendo con el análisis, evidentemente la contaminación que permitiríamos sería aquella cuyas externalidades negativas son a nivel global, nadie habla de cargarse el Mar Menor o de ponernos a destruir bosques a mansalva. Al final del día uno tiene que ser racional y pensar que la capa de ozono va a acabar pareciendo un queso de todas formas, da igual que hagamos o no hagamos nada (sí, no vamos a usar el argumento de que no tenemos que contaminar porque si nosotros no respetamos las leyes medioambientales habrá más gente que no lo haga, nuestra influencia en las decisiones del resto de países es, aproximadamente, -33). El único problema serio de no respetar las leyes medioambientales es que estamos en Europa y eso podría traernos muchos problemas y sanciones, pero no pasa nada, la solución para ese problemilla viene incluida en la cuarta medida.
+
+En el siguiente gráfico podemos ver el total mundial de emisiones de CO2 en el año 2022, los datos los he sacado de [Our World in Data](https://ourworldindata.org/co2-emissions), la verdad es que esta web me gusta mucho, si tuviese que hacer un ranking de webs que más frecuento (quitando las que ya sabemos que no puedo decir aquí 😉🤫) esta sería la primera sin ninguna duda. Podemos ver las aportaciones de diferentes países a esta lista, he puesto a varios de los que más emiten y a alguno de nuestro entorno. Podemos ver que nuestra influencia es, literalmente, insignificante:
+
+::: panel-tabset
+## Código
+```{r}
+#| code-fold: true
+library(ggplot2)
+library(gganimate)
+library(hrbrthemes)
+library(highcharter)
+library(sf)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(tmap) 
+options(scipen = 999)
+
+polucion <- "https://github.com/aluse33/datos_trabajo/raw/main/pollution_data.csv"
+
+download.file(url = polucion, destfile = "./datos/pollution_data.csv")
+
+polucion <- rio::import("./datos/pollution_data.csv")
+
+paises_que_molan <- c("World", "Spain", "United States", "India", "China", "European Union (27)", "Germany", "France")
+
+polucion_paises <- polucion %>% 
+  filter(Entity %in% paises_que_molan) %>% 
+  filter(Year >= 1900) %>% 
+  select(-Code)
+
+spain <- polucion_paises %>% filter(Entity == "Spain")
+USA <- polucion_paises %>% filter(Entity == "United States")
+india <- polucion_paises %>% filter(Entity == "India")
+EU <- polucion_paises %>% filter(Entity == "European Union (27)")
+germany <- polucion_paises %>% filter(Entity == "Germany")
+france <- polucion_paises %>% filter(Entity == "France")
+world_pol <- polucion_paises %>% filter(Entity == "World")
+china <- polucion_paises %>% filter(Entity == "China")
+
+plot_pol <- highchart() %>%
+  hc_chart(type = "line") %>% 
+  hc_add_series(spain, "line", hcaes(Year, `Annual CO₂ emissions`), name = "España") %>% 
+  hc_add_series(USA, "line", hcaes(Year, `Annual CO₂ emissions`), name = "USA") %>%
+  hc_add_series(india, "line", hcaes(Year, `Annual CO₂ emissions`), name = "India") %>%
+  hc_add_series(EU, "line", hcaes(Year, `Annual CO₂ emissions`), name = "EU(27)") %>%
+  hc_add_series(germany, "line", hcaes(Year, `Annual CO₂ emissions`), name = "Alemania") %>%
+  hc_add_series(france, "line", hcaes(Year, `Annual CO₂ emissions`), name = "Francia") %>%
+  hc_add_series(china, "line", hcaes(Year, `Annual CO₂ emissions`), name = "China") %>% 
+  hc_add_series(world_pol, "line", hcaes(Year, `Annual CO₂ emissions`), name = "Total mundial") %>% hc_title(text = "Emisiones de dióxido de carbono (CO₂) en el mundo, medidas en toneladas métricas al año.",
+style = list(fontWeight = "Semi Bold", color = "black")) %>% 
+  hc_subtitle(text = "Datos extraídos de Our World in Data.",
+              style = list(fontWeight = "Semi Bold",
+                           color = "black"))
+#- plot_pol
+```
+## Gráfico
+```{r}
+#| code-fold: true
+plot_pol
+```
+:::
+
+Si queremos verlo en un mapa resulta todavía más evidente, cuanto más oscuro más culpable (no penséis mal), y como podemos ver, son los que pensábamos: 
+
+::: panel-tabset
+## Código
+```{r}
+#| code-fold: true
+data(World) 
+world <- World
+
+polucion <- polucion %>% 
+  filter(Year == 2022) %>%
+  mutate(Entity = as.character(Entity)) %>% 
+  filter(Entity != "World") %>% 
+  rename(`Emisiones anuales de CO2` = `Annual CO₂ emissions`)
+
+polucion_mapa <- left_join(polucion, World, by = c("Code" = "iso_a3")) 
+
+mapa_molon <- polucion_mapa %>% 
+  ggplot() +
+  geom_sf(aes(fill = `Emisiones anuales de CO2`, geometry = geometry)) +
+  scale_fill_viridis_c(option = "inferno", trans = "sqrt", direction = -1) +
+  theme_void() +
+  labs(title = "Emisiones de dióxido de carbono (CO2) en el mundo." ) +
+  theme(plot.title = element_text(face = "bold")) +
+  labs(subtitle = "Año 2022. Datos de Our World in Data.") +
+  theme(panel.background = element_rect(fill = "azure"),
+        axis.text = element_blank(),  
+        axis.title = element_blank(), 
+        axis.ticks = element_blank()) + 
+  guides(fill = FALSE)
+#- mapa_molon
+```
+## Mapa
+```{r}
+#| code-fold: true
+mapa_molon
+```
+:::
+
+Visto lo visto, para potenciar nuestra economía es requisito *sine qua non* empezar a tomarnos en serio las cosas y olvidarnos de las idas de olla que se les ocurran a los políticos de Europa.
+
+
+## 3. Maravedíes respaldados con uranio.
+
+Vale, este punto quizá sea un pelín más técnico, pero no os preocupéis, se va a entender bien. Si recordáis la segunda medida, dije que contaminar mucho nos iba a traer problemas con Europa, bueno, pues por eso no pasa nada, porque la cuarta medida tiene dos partes, la primera parte es muy fácil de entender: sabotear a los países frugales lo máximo posible, es decir, hacer que nos rescaten y nos inyecten crédito a mansalva, crédito que, evidentemente, no les vamos a devolver. Aunque esto sea una putada para ellos, a nosotros nos tiene que dar igual, todo forma parte de **el plan**. La consecuencia directa es que nos echarían de la UE al instante, por lo que podríamos, todavía más, potenciar la segunda medida, ya que desaparece el yugo invisible que representa para nosotros la Comisión Europea. Que nos echen no significa que no podamos usar el euro, de hecho, Andorra mismamente, no forma parte de la UE y usa el euro, aunque resulta obvio que quizá no les parece bien que lo usemos. Bueno, en este contexto hemos de pensar que el euro vale, en la actualidad, prácticamente la mitad de lo que valía cuando nació (por lo que abandonarlo tampoco nos supondría un problema demasiado importante), esto es algo que se puede ver de manera muy chula en el siguiente gráfico (que he podido elaborar con [este repo](https://github.com/Jaldekoa/Banknote-Images-in-R) de github): 
+
+::: panel-tabset
+## Código
+```{r}
+#| code-fold: true
+library(jpeg)
+library(grid)
+library(ggplot2)
+library(ggthemes)
+
+#- cargamos los datos del ecb
+URL <- "https://sdw-wsrest.ecb.europa.eu/service/data/ICP/M.ES.N.000000.4.INX?format=csvdata"
+df <- read.csv(URL)[c("TIME_PERIOD", "OBS_VALUE")]
+
+df$TIME_PERIOD <- seq.Date(as.Date("1996-02-01"), by="month", length.out = nrow(df)) - 1
+df$OBS_VALUE <- as.numeric(df$OBS_VALUE)
+df <- df[df$TIME_PERIOD >= as.Date("1999-12-31"),]
+df$PPP <- df$OBS_VALUE[1]/df$OBS_VALUE
+
+#- imagen billete
+bill <- readJPEG("./imagenes/20_euros.jpg")
+bill <- rasterGrob(bill, width=unit(1,"npc"), height=unit(1,"npc"), interpolate=TRUE) 
+
+#- gráfico
+graph <- ggplot(df, aes(x = TIME_PERIOD, y = PPP)) +
+  
+  #- dibujamos el billete
+  annotation_custom(bill, xmin = -Inf, xmax = Inf, ymin = 0, ymax = Inf) +
+  
+  #- la parte blanca para delimitar
+  geom_ribbon(aes(ymin = PPP, ymax = Inf), fill = "white") +
+  geom_line(size=1, colour="#000000") +
+  geom_hline(yintercept=tail(df$PPP, 1), linetype="dashed") + 
+  
+  #- la escala
+  scale_x_date(date_breaks="3 year",date_labels = "%Y", expand=c(0,0)) +
+  scale_y_continuous(expand = c(0,0), labels = scales::percent, limits = c(0,1), breaks = seq(0, 1, 0.1)) +
+  
+  #- labels
+  labs(
+    title = "Poder Adquisitivo del €uro en España",
+    subtitle = "Desde 2000 hasta 2023, siendo 1 de enero de 2000 = 100%",
+    x="",
+    y="",
+    caption="Elaboración con el repo de @jaldeko. Fuente datos: ECB Statistical Data Warehouse") +
+   
+  # Add a theme and other aesthetics modifications
+  theme_minimal() +
+  theme(plot.caption = element_text(face="italic"), 
+        plot.title = element_text(face="bold", hjust=0.5, size=rel(1.5)),
+        plot.subtitle = element_text(face="italic", hjust=0.5),
+        axis.text.x = element_text(colour = "black", hjust=-0.5, face="bold"),
+        axis.text.y = element_text(colour = "black", face="bold"),
+        plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm"),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(colour="black"),
+        axis.ticks = element_line(colour="black"),
+        legend.key.height = unit(0.75, 'cm'),
+        legend.text = element_text(colour = "black", face="italic", size=rel(0.75)))
+
+#- graph
+```
+## Gráfico
+```{r}
+#| code-fold: true
+graph
+```
+:::
+
+Es importante actuar rápido, ya sabemos que dejar la autoridad monetaria en manos de nuestros políticos no es una opción, salvo que queramos pasar a ser Argentina en un día medio (aproximadamente).  Otra opción sería que, si el banco central fuese independiente (de verdad), hubiese tipos muy técnicos tomando las decisiones, bien, eso puede traernos problemas en el largo plazo en función del grado de independencia que mantenga el BC, por lo que lo mejor será olvidarnos de esta opción.
+
+La solución es mucho más sencilla, traer de vuelta los [maravedíes]( https://en.wikipedia.org/wiki/Maraved%C3%AD) y respaldar su valor con reservas de uranio, algo así como el [Patrón Oro](https://es.wikipedia.org/wiki/Patr%C3%B3n_oro), pero un poco más moderno y con una curva de oferta mucho más “ideal” para nuestra moneda. La idea básica es la siguiente (permítanme hablar un poco de física):
+
+1. Un átomo de uranio-238 (el isótopo más común del uranio, vaya) sigue un proceso de desintegración estocástico.
+2. La probabilidad de desintegración es directamente proporcional al número de átomos presentes en ese momento.
+3. Esta relación la podemos expresar con la ecuación diferencial de la ley de desintegración radiactiva (si algún lector ha ido a Matemáticas conmigo este curso debería saber esto):
+
+$$\frac{dN}{dt} = -\lambda N$$
+Siendo $\frac{dN}{dt}$ la tasa de variación del número de átomos con respecto al tiempo, $N$ la cantidad de átomos en un momento concreto y $-\lambda$ la constante de desintegración del uranio-238.
+
+Bueno, se resuelve de manera bastante sencilla, pensemos que es una EDO (ecuación diferencial ordinaria) lineal de primer orden, primero reordenamos:
+
+$$\frac{1}{N}\frac{dN}{dt} = -\lambda$$
+Habiendo reordenado los factores podemos integrar y obtener la solución general de nuestra EDO:
+$$\int \frac{1}{N} \, dN = -\lambda \int \, dt$$
+De modo que tenemos:
+
+$$\ln(N) = -t\lambda + C$$
+Finalmente, aplicando exponenciales y reordenando tenemos que la solución general es:
+$$N(t) = N_0 \cdot e^{-\lambda t}$$
+
+Es decir, la cantidad de átomos en $N(t)$ es igual a la cantidad de átomos en el momento $0$ por $e$ elevado a $-\lambda$ por el número de periodos que estemos considerando ($t$).
+
+Una vez tenemos en cuenta esta ley, podemos dar unos valores arbitrarios a las variables y a las constantes y representar gráficamente la función exponencial, sabiendo, eso sí, que como la probabilidad de desintegración del uranio es del 100% (esto quiere decir que sí o sí la curva sería como se representa en el gráfico), la oferta de maravedíes seguiría exactamente el mismo patrón (pero en negativo) que la desintegración natural de nuestras reservas de uranio, patrón que podemos considerar ideal. Podemos considerar esta curva ideal para la oferta monetaria de España después de aplicar las medidas mencionadas por estos dos motivos:
+
+- Boom económico (buenas medidas aplicadas y por aplicar) que impulsa mucho la demanda de dinero, por lo que, si al principio el aumento de M es exponencial, no pasa nada, porque la demanda de M también es creciente.
+
+- Estancamiento después del paso de unos cuantos periodos (curva casi plana), algo favorable ya que, como sabemos, los países ricos tienden a estancarse económicamente; por lo que nuestro estancamiento coincidiría con el momento en el que las reservas de uranio no dan para más y, consecuentemente, la oferta monetaria tampoco crecería (como somos economistas vamos a suponer que todo lo demás permanece constante y los bancos no crean dinero por medio del préstamo de los depósitos).
+
+Aquí podemos ver la explicación gráficamente:
+
+::: panel-tabset
+## Código
+```{r}
+#| code-fold: true
+#- Maravedí de uranio
+
+ley_desintegracion <- function(t, lambda) {
+  exp(-lambda * t)
+}
+
+lambda_uranio238 <- 0.0005
+
+data_uranio238 <- data.frame(t = seq(0, 10000, by = 1), 
+                             N = ley_desintegracion(seq(0, 10000, by = 1), lambda_uranio238))
+
+#- ahora, solamente calculamos la contraparte negativa, para ver el movimiento de M
+
+data_uranio238_neg <- data_uranio238 %>% 
+  mutate(neg = -N) %>% 
+  select(t, neg)
+
+plot_uranio238 <- ggplot(data_uranio238, aes(x = t, y = N)) +
+  geom_line(color = "blue", size = 1.2) +
+  geom_line(data = data_uranio238_neg, aes(x = t, y = neg), color = "red", size = 1.2) +
+  labs(title = "Proceso de desintegración de un átomo de uranio-238 y patrón que seguiría la oferta de maravadíes",
+       x = "Periodos t",
+       y = "Fracción de átomos restantes y su valor negativo") +
+  labs(subtitle = "(Desintegración en azul y patrón automático de la oferta monetaria en rojo)") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "green",  size = 1) +
+  theme_hc() +
+  theme(plot.title = element_text(hjust = 0.4, size = 9, face = "bold"),
+        axis.text = element_text(size = 10),
+        axis.title = element_text(size = 10),
+        legend.position = "none") +
+  theme(plot.subtitle = element_text(hjust = 0.5, size = 9, face = "italic"),
+        axis.text = element_text(size = 8),
+        axis.title = element_text(size = 8),
+        legend.position = "none")
+
+#- plot_uranio238
+```
+## Gráfico
+```{r}
+#| code-fold: true
+plot_uranio238
+```
+:::
+
+Una vez hecho esto, tendríamos un sistema monetario estable y acorde a los requerimientos de nuestra economía, sin embargo, es importante considerar las dos últimas medidas, ya que nuestro objetivo es que todo salga bien (i.e. haya convergencia) y no puedde quedar ningún cabo suelto.
+
+
+## 4. Sufragio joven.
+
+Bien es sabido por los lectores potenciales, después de haber visto los trabajos expuestos en clase por mis compañeros (los disponibles en la [web](https://perezp44.github.io/intro-ds-23-24-web/05-trabajos-estudiantes.html), que la situación en la que se encuentran los jóvenes en la actualidad es especialmente delicada. Los resultados no son para nada positivos en términos de empleo, salarios, o patrimonio inmobiliario, entre otras variables a considerar. 
+
+En este contexto, uno debe tener en cuenta que en el juego de la democracia una mayoría impone sus intereses, más o menos homogéneos, sobre otra minoría, que no puede más que resignarse a aceptar los resultados (ya que la desobediencia civil no es una opción 🥱). Si hablamos de redistribución de la riqueza, al menos en el caso de España, esto resulta todavía más evidente, los jubilados, sin saber muy bien cómo, votan organizadamente con un interés común: que nadie les toque la pensión. De modo que, si uno mira los programas de los distintos partidos, absolutamente nadie habla de recortar esta partida (recordemos que es la mayoritaria) de los presupuestos. O sea, tenemos a políticos muy poco espabilados quejándose de que el Ministerio de Igualdad cuesta 500 millones de euros al año y hablando de qué se haría si nos ahorramos ese dinero; bueno, es que las pensiones cuestan esos 500 millones AL DÍA^[Este año se ha alcanzado el récord de gasto en pensiones, [200.000 millones](https://www.elmundo.es/economia/macroeconomia/2023/07/26/64bfe2b1e4d4d872348b45a0.html)]. Nadie habla de bajarle o dejar de revalorizarle la pensión a aquel que cobra la mínima, pero seamos serios, que el tío abuelo de un amigo mío cobre 2.500 euros de pensión al mes no es lógico, vale que tiene que amueblar su cuarto piso y hay que ser comprensivos, pero no me vale; o sea, con dos sueldos de la Citroën pagó el piso, y no contento con eso, pudo comprar vivienda barata de la Sareb en pleno centro de Madrid para luego venderla a precio de mercado (spoiler: era de protección oficial).
+
+De hecho, si estudiamos los datos de renta anual neta media por persona (datos del INE para el aó 2022), veremos que los jubilados son el grupo de edad más privilegiado (recordemos que no trabajan y el resto de los ciudadanos les pagan las pensiones) y aquí, un servidor ha querido ser bueno, ya que podría haber mostrado los mismos datos pero con los alquileres imputados (algo muy normal a la hora de medir este tipo de datos); si hubiésemos hecho esto, evidentemente las estadísticas serían mucho más dramáticas: los jóvenes prácticamente no tienen vivienda (por lo que el valor sería el mismo), pero la práctica totalidad de los jubilados sí que tiene, por lo que su renta neta (con alquileres imputados) habría sido notablemente mayor:
+
+::: panel-tabset
+## Código
+```{r}
+#| code-fold: true
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(plotly)
+
+renta <- "https://github.com/aluse33/datos_trabajo/raw/main/9942.xlsx"
+
+download.file(url = renta, destfile = "./datos/9942.xlsx")
+
+renta <- rio::import("./datos/9942.xlsx")
+
+renta <- renta %>% 
+  slice(9:13) %>% 
+  select("Resultados nacionales":"...16") %>% 
+  slice(c(5, 1:(4), (6: n())))
+  
+renta <- renta %>% slice(1:5) %>% 
+   rename(
+  `Edad` = `Resultados nacionales`,
+  `2022` = ...2,
+  `2021` = ...3,
+  `2020` = ...4,
+  `2019` = ...5,
+  `2018` = ...6,
+  `2017` = ...7,
+  `2016` = ...8,
+  `2015` = ...9,
+  `2014` = ...10,
+  `2013` = ...11,
+  `2012` = ...12,
+  `2011` = ...13,
+  `2010` = ...14,
+  `2009` = ...15,
+  `2008` = ...16
+) %>% 
+  pivot_longer(
+    cols = c(`2022`, `2021`, `2020`, `2019`, `2018`, `2017`, `2016`, `2015`, `2014`, `2013`, `2012`, `2011`, `2010`, `2009`, `2008`),
+    names_to = "Año",
+    values_to = "Renta neta media"
+  )
+
+renta22 <- renta %>% filter(Año == 2022) %>% select(Edad, `Renta neta media`)
+
+#- cambiamos el formato de los datos porque si no nos joden para hacer los gráficos
+renta$`Renta neta media` <- as.numeric(renta$`Renta neta media`)
+renta$Año <- factor(renta$Año)
+renta22$Edad <- factor(renta22$Edad, levels = c("Menos de 18 años", "De 16 a 29 años", "De 30 a 44 años", "De 45 a 64 años", "65 y más años"))
+renta22$`Renta neta media` <- as.numeric(renta22$`Renta neta media`)
+
+#- gráfico barras 2022
+barras_renta22 <- renta22 %>% 
+  ggplot(aes(x = Edad, y = `Renta neta media`, fill = Edad)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Renta anual neta media en España por grupos de edad.",
+       subtitle = "Año 2022, medida en €.",
+       x = "Grupo de Edad",
+       y = "Renta neta media") +
+  theme_clean() +
+  theme(legend.position = "none")
+#- barras_renta22
+```
+
+## Gráfico
+```{r}
+#| code-fold: true
+barras_renta22
+```
+:::
+
+Lo mismo sucede si analizamos la evolución de esta variable en la última década; también podemos comprobar que los jóvenes fueron el grupo de edad más perjudicado por el boom inmobiliario del año 2008:
+
+::: panel-tabset
+## Código
+```{r}
+#| code-fold: true
+grafico_renta <- renta %>% 
+  ggplot(aes(x = Año, y = `Renta neta media`, group = Edad, color = Edad)) +
+  geom_line() +
+  labs(title = "Evolución de la renta neta anual media en € por grupo de edad en España, año 2008 a 2022.",
+       x = "Año",
+       y = "Renta neta media") +
+  theme_clean() +
+  theme(legend.position = "top")
+#- ggplotly(grafico_renta)
+```
+## Gráfico
+```{r}
+#| code-fold: true
+ggplotly(grafico_renta)
+```
+:::
+Conociendo esto y lo visto en las exposiciones de clase, queda evidenciado que no nos queda nada por hacer, terminar durante una década con el sufragio de los pensionistas es nuestra única opción, cierto es que vivieron una Guerra Civil y una dictadura, pero si conseguimos cambiar el relato para hacer creer a la sociedad que todo eso pasó en Call of Duty puede que aún nos quede algo de esperanza. Al fin y al cabo, de nada nos sirve mejorar la productividad de nuestra economía, crecer, y tener un sistema monetario que nos facilite estos objetivos si el 40% de los presupuestos (con cargo al endeudamiento) se van a cubrir interesesde un grupo en el que hay bastantes privilegiados.
+
+## 5. Neo-España y nuevas "estadísticas".
+
+Finalmente, esta es una medida que no me gustaría que se tuviese que aplicar, pero es cierto que, por muy buenas que sean las ideas ya propuestas, siempre existe un margen de error que hay que considerar, de manera que tener un plan B es necesario, sobre todo por si llegasemos a una situación en la que, ya habiendo aplicado lo mencionado, todavía no hemos convergido con las economías más avanzadas.
+
+Este plan B es un poco macabro, consiste en **manipular las estadísticas** de renta per cápita, pero esto lo podríamos conseguir way easier, la idea básica es, conociendo la **renta anual neta media por hogar en el año 2022** (obtenida del INE), expulsar de España a aquellas comunidades que nos bajan la media, de modo que, de manera automática, la media podría subir y, aunque el nivel de bienestar de los que nos quedamos sea el mismo (y de los que se van, claro), podríamos aparecer en puestos superiores en los índices que comaparan el nivel de bienestar económico de los países.
+
+Esta es la distribución de la renta anual neta de los hogares por comunidades autónomas:
+
+::: panel-tabset
+## Código
+```{r}
+#| code-fold: true
+library(rio)
+library(tidyverse)
+library(dplyr)
+library(tidyr)
+library(tmap)
+library(ggplot2)
+library(plotly)
+
+renta_com <- "https://github.com/aluse33/datos_trabajo/raw/main/9949.xlsx"
+
+download.file(url = renta_com, destfile = "./datos/9949.xlsx")
+
+renta_com <- rio::import("./datos/9949.xlsx")
+
+renta_com <- renta_com %>% 
+  slice(8:27) %>% 
+  rename(CCAA = `Resultados por comunidades autónomas`, `Renta anual neta media por hogar 2022` = ...2) 
+
+renta_com$`Renta anual neta media por hogar 2022` <- as.numeric(renta_com$`Renta anual neta media por hogar 2022`)
+  
+#- cargo los datos geográficos (en verdad esto es la hostia, que Pedro haya hecho un paquete así me parece una locura, pero bueno, vamo a seguir, que me quedan dos exámenes)
+
+geo_df <- pjpv.curso.R.2022::LAU2_prov_2020_canarias
+
+geo_ccaa <- geo_df %>%
+  select(ine_ccaa, ine_ccaa.n, geometry) 
+
+renta_com <- renta_com %>%
+  separate(CCAA, sep = " ",
+          into = c("ine_ccaa", "ine_ccaa.n"), extra = "merge") %>% 
+  slice(2:20)
+
+renta_com_geo <- left_join(geo_ccaa, renta_com, by = c("ine_ccaa" = "ine_ccaa"))
+
+mapa_renta_com <- renta_com_geo %>% 
+  ggplot() +
+  geom_sf(aes(fill = `Renta anual neta media por hogar 2022`, geometry = geometry), color = "black", size = .1) +
+  coord_sf(xlim = c(-12, 5), ylim = c(35,45)) +
+  scale_fill_viridis_c(option = "plasma", trans = "sqrt", direction = -1) +
+  labs(title = "Renta por hogar anual neta media por hogar en España." ) +
+  theme(plot.title = element_text(face = "bold")) +
+  labs(subtitle = "Año 2022.") +
+  labs(fill = "Renta en miles de €:") +
+  labs(caption = "Datos obtenidos en la web del INE.") +
+  theme_void() +
+  theme(panel.background = element_rect(fill = "azure"),
+        axis.text = element_blank(),  
+        axis.title = element_blank(), 
+        axis.ticks = element_blank()) 
+#- mapa_renta_com
+```
+## Mapa
+```{r}
+#| code-fold: true
+mapa_renta_com
+```
+:::
+
+Como vemos, algunas comunidades no han hecho los deberes y sus resultados son bastante mejorables. Realmente no pasa nada, geográficamente seguirán al lado y desde Neo-España les podremos ayudar: los convenios entre países cercanos están a la orden del día en materia sanitaria, comercial, laboral, etc. Las regiones seleccionadas en función de los valores de su renta neta media por hogar son Extremadura, Andalucía y Canarias. Es cierto que siguiendo este criterio Castilla-La Mancha debería estar fuera también, pero hay un motivo fundamental por el que se queda dentro: un servidor es conquense y se mueve mucho entre Cuenca y Valencia, por lo que habría ciertas complicaciones técnicas todos los meses y determinados gastos derivados que no estoy dispuesto a asumir, de modo que Castilla se queda en Neo-España.
+
+El nuevo mapa quedaría tal que así:
+
+::: panel-tabset
+## Código
+```{r}
+#| code-fold: true
+#- vamos a secesionar un poco
+
+pobres <- c("Andalucía", "Extremadura", "Canarias")
+
+renta_sin_pobres <- renta_com_geo %>% 
+  select(-ine_ccaa.n.y) %>% 
+  filter(!(ine_ccaa.n.x %in% pobres))
+
+mapa_renta_sin <- renta_sin_pobres %>% 
+  ggplot() +
+  geom_sf(aes(fill = `Renta anual neta media por hogar 2022`, geometry = geometry), color = "black", size = .1) +
+  coord_sf(xlim = c(-12, 5), ylim = c(35,45)) +
+  scale_fill_viridis_c(option = "inferno", trans = "sqrt", direction = -1) +
+  labs(title = "Renta por hogar anual neta media por hogar en Neo-España.") +
+  theme(plot.title = element_text(face="bold", size=18))+
+  labs(subtitle = "Año 20XX.") +
+  labs(fill = "Renta en miles de €:") +
+  labs(caption = "Datos obtenidos en la web del INE (manipulados para que las estadísticas molen más).") +
+  theme_void() +
+  theme(panel.background = element_rect(fill = "azure"),
+        axis.text = element_blank(),  
+        axis.title = element_blank(), 
+        axis.ticks = element_blank())
+#- mapa_renta_sin
+```
+## Mapa
+```{r}
+#| code-fold: true
+mapa_renta_sin
+```
+:::
+
+Vemos en la escala de la derecha que el intervalo de renta ha subido considerablemente, lo que nos permitiría escalar en las estadísticas internacionales de bienestar y, aparentemente, converger; al final hay que pensar que son eso, estadísticas, y con tal de cumplir el objetivo de convergencia que hemos propuesto al principio del trabajo, todo vale, ¿o no 🤔🤔? 
+
+## Conclusiones
+
+Bueno, espero que la lectura le haya resultado amena al lector, al final, el objetivo era poder programar varias cosas y pásarmelo bien haciendo el trabajo (espero poder haber transmitido esto a quien lo haya leído). Por otro lado, la situación en la que nos encontramos actualmente como sociedad es complicada, es complicado saber que hay que hacer o dejar de hacer, mucha gente propone soluciones, muchas de ellas populistas, disparatadas, y sin sentido, el objetivo también ha sido satirizar un poco sobre ese sector de la sociedad que cree tener la verdad absoluta y que el país podría arreglarse en una semana. Por mí parte, estoy contento con el país que tenemos y, a pesar de tener que mejorar en muchos aspectos, me gusta España y quiero que mi futuro se siga desarrollando aquí. Por lo que el único consejo serio del trabajo sería: valoremos lo que tenemos y cuidémoslo. 
+
+### Información sobre la sesión
+
+Abajo muestro mi entorno de trabajo y paquetes utilizados
+
+```{r}
+#| echo: false
+sessioninfo::session_info() %>% 
+  details::details(summary = 'current session info') 
+```
+
+```{r}
+#| echo: true
+rm(list = ls())
+```
+
+
+

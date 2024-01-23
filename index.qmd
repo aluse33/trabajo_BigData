@@ -1,0 +1,30 @@
+---
+title: Arreglando la Economía Española como no lo haría un economista (o cinco excusas para programar)             
+image: imagenes/tommy.gif      #- poned una foto vuestra
+about:
+  template: trestles       #- {jolla, solana, ...}
+  image-width: 27em         #- https://cybmeta.com/em-y-rem
+  image-shape: rectangle    #- {rectangle, round, rounded}
+  links:
+    - icon: envelope
+      text: e-mail
+      url: "mailto:aluse@alumni.uv.es"            
+    - icon: instagram
+      text: Instagram
+      url: "https://instagram.com/alexlucas18"
+    - icon: github
+      text: Github
+      href: https://github.com/aluse33         
+---
+        
+Buenas, soy Alejandro Lucas.
+      
+Esta web sirve para presentar el trabajo final individual para la asignatura "Programación y manejo de datos en la era Del Big Data", optativa de GECO en la Facultad de Economía de la Universitat de València.
+
+La web de la asignatura está [aquí](https://perezp44.github.io/intro-ds-23-24-web/){target="_blank"} y los trabajos de mis compañeros de curso puedes verlos [aquí](https://perezp44.github.io/intro-ds-23-24-web/05-trabajos-estudiantes.html){target="_blank"}.
+
+
+Mi trabajo lleva por título: "Arreglando la Economía Española como **no** lo haría un economista (o cinco excusas para programar)". El objetivo del trabajo es, esencialmente, mostrar (de manera cómica) 5 medidas para impulsar nuestra economía y, de una vez por todas, alcanzar a Europa y a las economías líderes. El lector podrá comprobar rápidamente que las cinco medidas son un sinsentido, en efecto, quizá la parte del título que de manera más precisa deja ver mis intenciones es la que está entre paréntesis; sí, el objetivo es tener un ligero abanico de posibilidades para programar varias cosas en R, pero bueno, eso es lo de menos (o eso creo 🤔).
+
+
+El trabajo puede verse [aquí](my_trabajo_BigData.html).
